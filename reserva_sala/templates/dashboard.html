@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold mb-1">Bienvenido, {{ user.nombre }} {{ user.apellido }}</h4>
+                        <p class="text-muted mb-0">¿Qué deseas hacer hoy?</p>
+                    </div>
+                    <span class="badge bg-primary p-2 rounded-pill">
+                        <i class="fas fa-user me-1"></i> {{ user.accesos.count }} Accesos
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-id-card me-2 text-primary"></i>Información Personal
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">Nombre Completo</span>
+                        <span class="fw-medium">{{ user.nombre }} {{ user.apellido }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">RUT</span>
+                        <span class="fw-medium">{{ user.rut }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">Email</span>
+                        <span class="fw-medium">{{ user.email }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-door-open me-2 text-primary"></i>Mis Salas
+                </h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i>Actualizar</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if user.accesos.all %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sala</th>
+                                <th>Descripción</th>
+                                <th>Clave de Acceso</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for acceso in user.accesos.all %}
+                            <tr>
+                                <td class="fw-medium">{{ acceso.sala.nombre }}</td>
+                                <td>{{ acceso.sala.descripcion|default:"Sin descripción"|truncatechars:30 }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ acceso.clave_acceso }}</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-key me-1"></i>Acceder
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-door-closed text-muted" style="font-size: 3rem;"></i>
+                    <p class="mt-3 text-muted">No tienes acceso a ninguna sala actualmente.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-history me-2 text-primary"></i>Actividad Reciente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-list text-muted" style="font-size: 2rem;"></i>
+                    <p class="mt-3 mb-0 text-muted">No hay actividad reciente para mostrar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
