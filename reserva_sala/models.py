@@ -30,8 +30,8 @@ class CustomUserManager(BaseUserManager):
 class Usuario(AbstractUser):
     username = None  # Deshabilitamos el campo username predeterminado
     rut = models.CharField(max_length=12, unique=True)
-    nombre = models.CharField(max_length=100)
-    apellido = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
 
     ESTADOS_CHOICES = [
@@ -45,12 +45,12 @@ class Usuario(AbstractUser):
 
     # Campos requeridos por Django al extender AbstractUser
     USERNAME_FIELD = "email"  # Usamos email como campo de login en lugar de username
-    REQUIRED_FIELDS = ["rut", "nombre", "apellido"]
+    REQUIRED_FIELDS = ["rut", "first_name", "last_name"]
 
     objects = CustomUserManager()
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido} ({self.rut})"
+        return f"{self.first_name} {self.last_name} ({self.rut})"
 
 
 class Sala(models.Model):
@@ -101,7 +101,7 @@ class AccesoSala(models.Model):
         unique_together = ("usuario", "sala", "fecha_reserva", "bloque_horario")
 
     def __str__(self):
-        return f"Reserva de {self.usuario.nombre} en {self.sala.nombre} - {self.fecha_reserva} ({self.get_bloque_horario_display()})"
+        return f"Reserva de {self.usuario.first_name} {self.usuario.last_name} en {self.sala.nombre} - {self.fecha_reserva} ({self.get_bloque_horario_display()})"
 
 
 # Create your models here.
