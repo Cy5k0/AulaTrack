@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 
 
 class CustomUserManager(BaseUserManager):
@@ -99,9 +100,19 @@ class AccesoSala(models.Model):
 
     class Meta:
         unique_together = ("usuario", "sala", "fecha_reserva", "bloque_horario")
+        ordering = ["-fecha_reserva", "bloque_horario"]
 
     def __str__(self):
         return f"Reserva de {self.usuario.first_name} {self.usuario.last_name} en {self.sala.nombre} - {self.fecha_reserva} ({self.get_bloque_horario_display()})"
+
+    def clean(self):
+        # Validar que no haya reservas duplicadas
+        if AccesoSala.objects.filter(
+            sala=self.sala,
+            fecha_reserva=self.fecha_reserva,
+            bloque_horario=self.bloque_horario,
+        ).exists():
+            raise ValidationError("Este bloque ya está reservado")
 
 
 # Create your models here.

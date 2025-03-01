@@ -1,0 +1,49 @@
+/* Estilos para el modal de nuevo usuario */
+#userFormContent {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+#newUserModalLabel {
+    font-weight: 600;
+}
+
+#userFormBody {
+    padding: 1.5rem;
+}
+
+#userFormFooter {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Animación para el modal */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+
+/* Estilos para los inputs del formulario */
+#newUserForm .form-control,
+#newUserForm .form-select {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+#newUserForm .form-control:focus,
+#newUserForm .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}
+
+/* Botón de guardar */
+#saveUserBtn {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+} 
