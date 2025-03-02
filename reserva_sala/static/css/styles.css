@@ -1,0 +1,185 @@
+/* Variables personalizadas */
+:root {
+    --primary-color: #4361ee;
+    --primary-hover: #3a56d4;
+    --secondary-color: #2b2d42;
+    --accent-color: #4cc9f0;
+    --light-color: #f8f9fa;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --success: #28a745;
+}
+
+/* Estilos generales */
+body {
+    color: var(--text-color);
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Modales - Estilos base */
+.modal-content {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+/* Modal Usuarios */
+#userFormContent .modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+#userFormContent .form-control,
+#userFormContent .form-select {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+#userFormContent .form-control:focus,
+#userFormContent .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}
+
+/* Modal Salas */
+#classroomFormContent .modal-header {
+    background-color: var(--success);
+    color: white;
+}
+
+#classroomFormContent .form-control,
+#classroomFormContent .form-select {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+#classroomFormContent .form-control:focus,
+#classroomFormContent .form-select:focus {
+    border-color: var(--success);
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}
+
+/* Elementos específicos de formularios modales */
+#classroomDescription {
+    resize: none;
+    min-height: 100px;
+}
+
+#saveUserBtn,
+#saveClassroomBtn {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Animaciones modales */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+
+/* Estilos para el modal de nuevo usuario */
+#userFormContent {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+#newUserModalLabel {
+    font-weight: 600;
+}
+
+#userFormBody {
+    padding: 1.5rem;
+}
+
+#userFormFooter {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Estilos para el modal de nueva sala */
+#classroomFormContent {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+#newClassroomModalLabel {
+    font-weight: 600;
+}
+
+#classroomFormBody {
+    padding: 1.5rem;
+}
+
+#classroomFormFooter {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Estilo para el textarea */
+#classroomDescription {
+    resize: none;
+    min-height: 100px;
+}
+
+/* Estilos del navbar */
+.navbar {
+    background-color: var(--secondary-color) !important; /* Asegurar color de fondo */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: white !important; /* Texto blanco */
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important; /* Texto claro */
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Asegurar que el dropdown tenga contraste */
+.navbar-dark .dropdown-menu {
+    background-color: var(--secondary-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-dark .dropdown-item {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-dark .dropdown-item:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Navbar, cards, botones, etc. existentes se mantienen igual */ 

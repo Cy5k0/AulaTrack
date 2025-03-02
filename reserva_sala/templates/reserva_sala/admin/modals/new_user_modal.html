@@ -1,0 +1,75 @@
+<!-- Modal para Nuevo Usuario -->
+<div class="modal fade" id="newUserModal" tabindex="-1" aria-labelledby="newUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="userFormContent">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="newUserModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Crear Nuevo Usuario
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="userFormBody">
+                <form id="newUserForm" method="post" action="{% url 'create_user' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="userRut" class="form-label">RUT</label>
+                        <input type="text" class="form-control" id="userRut" name="rut" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="userFirstName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="userFirstName" name="first_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="userLastName" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="userLastName" name="last_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="userEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userPassword" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="userPassword" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userStatus" class="form-label">Estado</label>
+                        <select class="form-select" id="userStatus" name="estado">
+                            <option value="Presente">Presente</option>
+                            <option value="Con Permiso">Con Permiso</option>
+                            <option value="Con Licencia Médica">Con Licencia Médica</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" id="userFormFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="newUserForm" class="btn btn-primary" id="saveUserBtn">
+                    <i class="fas fa-save me-2"></i>Guardar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('userPassword');
+    
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
+});
+</script> 

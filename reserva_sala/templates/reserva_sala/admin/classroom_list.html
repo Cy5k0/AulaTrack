@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Salas{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="fas fa-door-open me-2"></i>Gestión de Salas</h2>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newClassroomModal">
+            <i class="fas fa-plus-circle me-2"></i>Nueva Sala
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if classrooms %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for classroom in classrooms %}
+                        <tr>
+                            <td class="fw-medium">{{ classroom.nombre }}</td>
+                            <td>{{ classroom.descripcion|default:"Sin descripción"|truncatechars:50 }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if classroom.estado == 'Desocupada' %}bg-success
+                                    {% elif classroom.estado == 'Ocupada' %}bg-danger
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ classroom.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>{{ classroom.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-classroom-btn" 
+                                            data-classroom-id="{{ classroom.id }}"
+                                            data-classroom-nombre="{{ classroom.nombre }}"
+                                            data-classroom-descripcion="{{ classroom.descripcion|default:'' }}"
+                                            data-classroom-estado="{{ classroom.estado }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="{% url 'delete_classroom' classroom.id %}" class="btn btn-sm btn-outline-danger delete-btn"
+                                       onclick="return confirm('¿Estás seguro de eliminar la sala {{ classroom.nombre }}?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-door-closed text-muted" style="font-size: 3rem;"></i>
+                <p class="mt-3 text-muted">No hay salas registradas</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Sala -->
+<div class="modal fade" id="editClassroomModal" tabindex="-1" aria-labelledby="editClassroomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="classroomFormContent">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="editClassroomModalLabel">
+                    <i class="fas fa-edit me-2"></i>Editar Sala
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="classroomFormBody">
+                <form id="editClassroomForm" method="post" action="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="editClassroomName" class="form-label">Nombre de la Sala</label>
+                        <input type="text" class="form-control" id="editClassroomName" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editClassroomDescription" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="editClassroomDescription" name="descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editClassroomStatus" class="form-label">Estado</label>
+                        <select class="form-select" id="editClassroomStatus" name="estado">
+                            <option value="Desocupada">Desocupada</option>
+                            <option value="Ocupada">Ocupada</option>
+                            <option value="Inhabilitada">Inhabilitada</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" id="classroomFormFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="editClassroomForm" class="btn btn-success" id="updateClassroomBtn">
+                    <i class="fas fa-save me-2"></i>Actualizar Sala
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir el modal de creación de sala -->
+{% include 'reserva_sala/admin/modals/new_classroom_modal.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle edit classroom button clicks
+    const editButtons = document.querySelectorAll('.edit-classroom-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const classroomId = this.getAttribute('data-classroom-id');
+            const classroomNombre = this.getAttribute('data-classroom-nombre');
+            const classroomDescripcion = this.getAttribute('data-classroom-descripcion');
+            const classroomEstado = this.getAttribute('data-classroom-estado');
+            
+            // Set form action
+            document.getElementById('editClassroomForm').action = `/classrooms/update/${classroomId}/`;
+            
+            // Populate form fields
+            document.getElementById('editClassroomName').value = classroomNombre;
+            document.getElementById('editClassroomDescription').value = classroomDescripcion;
+            
+            // Set select value
+            const selectElement = document.getElementById('editClassroomStatus');
+            for (let i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === classroomEstado) {
+                    selectElement.selectedIndex = i;
+                    break;
+                }
+            }
+            
+            // Show modal
+            const editModal = new bootstrap.Modal(document.getElementById('editClassroomModal'));
+            editModal.show();
+        });
+    });
+});
+</script>
+{% endblock %} 

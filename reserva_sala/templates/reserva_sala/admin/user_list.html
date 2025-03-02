@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="fas fa-users me-2"></i>Gestión de Usuarios</h2>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newUserModal">
+            <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if users %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>RUT</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="fw-medium">{{ user.first_name }} {{ user.last_name }}</td>
+                            <td>{{ user.rut }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if user.estado == 'Presente' %}bg-success
+                                    {% elif user.estado == 'Con Permiso' %}bg-warning
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ user.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-user-btn" 
+                                            data-user-id="{{ user.id }}"
+                                            data-user-rut="{{ user.rut }}"
+                                            data-user-first-name="{{ user.first_name }}"
+                                            data-user-last-name="{{ user.last_name }}"
+                                            data-user-email="{{ user.email }}"
+                                            data-user-estado="{{ user.estado }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="{% url 'delete_user' user.id %}" class="btn btn-sm btn-outline-danger delete-btn"
+                                       onclick="return confirm('¿Estás seguro de eliminar a {{ user.first_name }} {{ user.last_name }}?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users-slash text-muted" style="font-size: 3rem;"></i>
+                <p class="mt-3 text-muted">No hay usuarios registrados</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Usuario -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="userFormContent">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editUserModalLabel">
+                    <i class="fas fa-user-edit me-2"></i>Editar Usuario
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="userFormBody">
+                <form id="editUserForm" method="post" action="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="editUserRut" class="form-label">RUT</label>
+                        <input type="text" class="form-control" id="editUserRut" name="rut" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editUserFirstName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editUserFirstName" name="first_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editUserLastName" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="editUserLastName" name="last_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUserEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editUserEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUserPassword" class="form-label">Nueva Contraseña (dejar en blanco para mantener la actual)</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="editUserPassword" name="password">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleEditPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editUserStatus" class="form-label">Estado</label>
+                        <select class="form-select" id="editUserStatus" name="estado">
+                            <option value="Presente">Presente</option>
+                            <option value="Con Permiso">Con Permiso</option>
+                            <option value="Con Licencia Médica">Con Licencia Médica</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" id="userFormFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="editUserForm" class="btn btn-primary" id="updateUserBtn">
+                    <i class="fas fa-save me-2"></i>Actualizar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir el modal de creación de usuario -->
+{% include 'reserva_sala/admin/modals/new_user_modal.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility for edit form
+    const toggleEditPassword = document.getElementById('toggleEditPassword');
+    const editPasswordInput = document.getElementById('editUserPassword');
+    
+    toggleEditPassword.addEventListener('click', function() {
+        const type = editPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        editPasswordInput.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('fa-eye');
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+    
+    // Handle edit user button clicks
+    const editButtons = document.querySelectorAll('.edit-user-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userRut = this.getAttribute('data-user-rut');
+            const userFirstName = this.getAttribute('data-user-first-name');
+            const userLastName = this.getAttribute('data-user-last-name');
+            const userEmail = this.getAttribute('data-user-email');
+            const userEstado = this.getAttribute('data-user-estado');
+            
+            // Set form action
+            document.getElementById('editUserForm').action = `/users/update/${userId}/`;
+            
+            // Populate form fields
+            document.getElementById('editUserRut').value = userRut;
+            document.getElementById('editUserFirstName').value = userFirstName;
+            document.getElementById('editUserLastName').value = userLastName;
+            document.getElementById('editUserEmail').value = userEmail;
+            document.getElementById('editUserPassword').value = '';
+            
+            // Set select value
+            const selectElement = document.getElementById('editUserStatus');
+            for (let i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === userEstado) {
+                    selectElement.selectedIndex = i;
+                    break;
+                }
+            }
+            
+            // Show modal
+            const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            editModal.show();
+        });
+    });
+});
+</script>
+{% endblock %} 
