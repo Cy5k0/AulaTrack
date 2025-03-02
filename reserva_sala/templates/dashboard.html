@@ -45,7 +45,7 @@
                                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newUserModal">
                                         <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
                                     </button>
-                                    <a href="{% url 'manage_user' 'list' %}" class="btn btn-outline-secondary">
+                                    <a href="{% url 'list_users' %}" class="btn btn-outline-secondary">
                                         <i class="fas fa-list me-2"></i>Listar Usuarios
                                     </a>
                                 </div>
@@ -61,10 +61,10 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <a href="{% url 'manage_classroom' 'new' %}" class="btn btn-success">
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newClassroomModal">
                                         <i class="fas fa-plus-circle me-2"></i>Nueva Sala
-                                    </a>
-                                    <a href="{% url 'manage_classroom' 'list' %}" class="btn btn-outline-secondary">
+                                    </button>
+                                    <a href="{% url 'list_classrooms' %}" class="btn btn-outline-secondary">
                                         <i class="fas fa-list me-2"></i>Listar Salas
                                     </a>
                                 </div>
@@ -233,6 +233,49 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" form="newUserForm" class="btn btn-primary" id="saveUserBtn">
                     <i class="fas fa-save me-2"></i>Guardar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nueva Sala -->
+<div class="modal fade" id="newClassroomModal" tabindex="-1" aria-labelledby="newClassroomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="classroomFormContent">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="newClassroomModalLabel">
+                    <i class="fas fa-door-open me-2"></i>Crear Nueva Sala
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="classroomFormBody">
+                <form id="newClassroomForm" method="post" action="{% url 'create_classroom' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="classroomName" class="form-label">Nombre de la Sala</label>
+                        <input type="text" class="form-control" id="classroomName" name="nombre" required 
+                               placeholder="Ej: Sala 101, Laboratorio de Ciencias">
+                    </div>
+                    <div class="mb-3">
+                        <label for="classroomDescription" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="classroomDescription" name="descripcion" rows="3" 
+                                  placeholder="Descripción detallada de la sala"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="classroomStatus" class="form-label">Estado</label>
+                        <select class="form-select" id="classroomStatus" name="estado">
+                            <option value="Desocupada">Desocupada</option>
+                            <option value="Ocupada">Ocupada</option>
+                            <option value="Inhabilitada">Inhabilitada</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" id="classroomFormFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="newClassroomForm" class="btn btn-success" id="saveClassroomBtn">
+                    <i class="fas fa-save me-2"></i>Guardar Sala
                 </button>
             </div>
         </div>

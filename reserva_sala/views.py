@@ -105,3 +105,120 @@ def create_user(request):
     except Exception as e:
         messages.error(request, f"Error al crear usuario: {str(e)}")
         return redirect("dashboard")
+
+
+@require_POST
+@user_passes_test(lambda u: u.is_superuser)
+def create_classroom(request):
+    try:
+        nombre = request.POST.get("nombre")
+        descripcion = request.POST.get("descripcion")
+        estado = request.POST.get("estado")
+
+        # Crear la sala
+        sala = Sala.objects.create(
+            nombre=nombre, descripcion=descripcion, estado=estado
+        )
+
+        messages.success(request, f"Sala '{nombre}' creada exitosamente")
+        return redirect("dashboard")
+    except Exception as e:
+        messages.error(request, f"Error al crear sala: {str(e)}")
+        return redirect("dashboard")
+
+
+# Vistas para listar usuarios
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def list_users(request):
+    users = Usuario.objects.all().order_by("last_name", "first_name")
+    return render(request, "reserva_sala/admin/user_list.html", {"users": users})
+
+
+# Vista para listar salas
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def list_classrooms(request):
+    classrooms = Sala.objects.all().order_by("nombre")
+    return render(
+        request, "reserva_sala/admin/classroom_list.html", {"classrooms": classrooms}
+    )
+
+
+# Vista para eliminar usuario
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def delete_user(request, user_id):
+    try:
+        user = Usuario.objects.get(id=user_id)
+        name = f"{user.first_name} {user.last_name}"
+        user.delete()
+        messages.success(request, f"Usuario {name} eliminado correctamente")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar usuario: {str(e)}")
+    return redirect("list_users")
+
+
+# Vista para eliminar sala
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def delete_classroom(request, classroom_id):
+    try:
+        classroom = Sala.objects.get(id=classroom_id)
+        name = classroom.nombre
+        classroom.delete()
+        messages.success(request, f"Sala {name} eliminada correctamente")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar sala: {str(e)}")
+    return redirect("list_classrooms")
+
+
+# Vista para actualizar usuario
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def update_user(request, user_id):
+    try:
+        user = Usuario.objects.get(id=user_id)
+        if request.method == "POST":
+            user.rut = request.POST.get("rut")
+            user.first_name = request.POST.get("first_name")
+            user.last_name = request.POST.get("last_name")
+            user.email = request.POST.get("email")
+            user.estado = request.POST.get("estado")
+
+            # Solo actualizar la contraseña si se proporciona una nueva
+            password = request.POST.get("password")
+            if password and password.strip():
+                user.set_password(password)
+
+            user.save()
+            messages.success(
+                request,
+                f"Usuario {user.first_name} {user.last_name} actualizado correctamente",
+            )
+        else:
+            return JsonResponse({"error": "Método no permitido"}, status=405)
+    except Exception as e:
+        messages.error(request, f"Error al actualizar usuario: {str(e)}")
+    return redirect("list_users")
+
+
+# Vista para actualizar sala
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def update_classroom(request, classroom_id):
+    try:
+        classroom = Sala.objects.get(id=classroom_id)
+        if request.method == "POST":
+            classroom.nombre = request.POST.get("nombre")
+            classroom.descripcion = request.POST.get("descripcion")
+            classroom.estado = request.POST.get("estado")
+            classroom.save()
+            messages.success(
+                request, f"Sala {classroom.nombre} actualizada correctamente"
+            )
+        else:
+            return JsonResponse({"error": "Método no permitido"}, status=405)
+    except Exception as e:
+        messages.error(request, f"Error al actualizar sala: {str(e)}")
+    return redirect("list_classrooms")
