@@ -47,7 +47,15 @@ class DashboardView(View):
     template_name = "dashboard.html"
 
     def get(self, request):
-        return render(request, self.template_name)
+        # Consultar las salas disponibles (todas las salas para mostrar su estado)
+        salas_disponibles = Sala.objects.all().order_by('nombre')
+        
+        # Pasar las salas al contexto
+        context = {
+            'salas_disponibles': salas_disponibles
+        }
+        
+        return render(request, self.template_name, context)
 
 
 # Vista de reserva
@@ -77,11 +85,45 @@ class ManageClassroomView(UpdateView):
     success_url = reverse_lazy("dashboard")
 
 
+def validar_rut_chileno(rut):
+    rut = rut.upper().replace(".", "").replace("-", "")
+    cuerpo = rut[:-1]
+    dv = rut[-1]
+
+    if not cuerpo.isdigit():
+        return False
+
+    suma = 0
+    multiplo = 2
+
+    for c in reversed(cuerpo):
+        suma += int(c) * multiplo
+        multiplo = multiplo + 1 if multiplo < 7 else 2
+
+    dv_calculado = 11 - (suma % 11)
+    if dv_calculado == 10:
+        dv_calculado = 'K'
+    elif dv_calculado == 11:
+        dv_calculado = '0'
+    else:
+        dv_calculado = str(dv_calculado)
+
+    return dv == dv_calculado
+
+
 @require_POST
 @user_passes_test(lambda u: u.is_superuser)
 def create_user(request):
     try:
-        rut = request.POST.get("rut")
+        rut = request.POST.get("rut").upper().replace(".", "").replace("-", "")
+        
+        if not validar_rut_chileno(rut):
+            messages.error(request, "RUT inválido")
+            return redirect("dashboard")
+            
+        # Formatear RUT con guión: 12345678-9
+        rut_formateado = f"{rut[:-1]}-{rut[-1]}"
+        
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         email = request.POST.get("email")
@@ -91,7 +133,7 @@ def create_user(request):
         # Crear el usuario
         user = Usuario.objects.create_user(
             email=email,
-            rut=rut,
+            rut=rut_formateado,
             password=password,
             first_name=first_name,
             last_name=last_name,
