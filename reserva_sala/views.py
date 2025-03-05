@@ -113,41 +113,36 @@ class ReservationView(CreateView):
     success_url = reverse_lazy("dashboard")
 
     def get_context_data(self, **kwargs):
-        from datetime import date, timedelta
+        from datetime import date
         import json
         
         context = super().get_context_data(**kwargs)
         sala = Sala.objects.get(id=self.kwargs["pk"])
-        context['sala'] = sala
-        context['today_date'] = date.today().isoformat()
         
-        # Obtener las reservas existentes para esta sala (próximos 30 días)
-        fecha_inicio = date.today()
-        fecha_fin = fecha_inicio + timedelta(days=30)
+        # Obtener todas las reservas de la sala ordenadas
+        reservas_existentes = AccesoSala.objects.filter(sala=sala).order_by(
+            '-fecha_reserva', 
+            'bloque_horario'
+        )
         
-        reservas_existentes = AccesoSala.objects.filter(
-            sala=sala,
-            fecha_reserva__gte=fecha_inicio,
-            fecha_reserva__lte=fecha_fin
-        ).select_related('usuario')
-        
-        # Crear un diccionario para almacenar las reservas por fecha y bloque
-        reservas_por_fecha = {}
+        # Preparar datos para la tabla
+        reservas_ordenadas = []
         for reserva in reservas_existentes:
-            fecha_str = reserva.fecha_reserva.isoformat()
-            if fecha_str not in reservas_por_fecha:
-                reservas_por_fecha[fecha_str] = []
-            
-            reservas_por_fecha[fecha_str].append({
-                'bloque': reserva.bloque_horario,
-                'bloque_display': reserva.get_bloque_horario_display(),
-                'usuario': str(reserva.usuario),
-                'curso': reserva.curso or 'No especificado',
-                'actividad': reserva.descripcion_actividad or 'No especificada'
+            reservas_ordenadas.append({
+                'fecha': reserva.fecha_reserva.strftime("%Y-%m-%d"),
+                'fecha_display': reserva.fecha_reserva.strftime("%d/%m/%Y"),
+                'bloque': reserva.get_bloque_horario_display(),
+                'estado': 'Ocupado' if reserva.sala.estado == 'Ocupada' else 'Finalizado',
+                'curso': reserva.curso,
+                'actividad': reserva.descripcion_actividad,
+                'usuario': str(reserva.usuario)
             })
         
-        # Convertir a JSON para usar en JavaScript
-        context['reservas_json'] = json.dumps(reservas_por_fecha)
+        context.update({
+            'sala': sala,
+            'today_date': date.today().isoformat(),
+            'reservas_ordenadas': reservas_ordenadas
+        })
         
         return context
 

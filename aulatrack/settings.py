@@ -115,7 +115,7 @@ AUTH_USER_MODEL = "reserva_sala.Usuario"
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Santiago"
 
 USE_I18N = True
 
