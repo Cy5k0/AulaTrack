@@ -21,4 +21,5 @@ urlpatterns = [
         views.update_classroom,
         name="update_classroom",
     ),
+    path('reservar/<int:pk>/', views.ReservationView.as_view(), name='reservar_sala'),
 ]
