@@ -113,26 +113,46 @@ class ReservationView(CreateView):
     success_url = reverse_lazy("dashboard")
 
     def get_context_data(self, **kwargs):
-        from datetime import date
+        from datetime import datetime, time
         import json
         
         context = super().get_context_data(**kwargs)
         sala = Sala.objects.get(id=self.kwargs["pk"])
+        now = datetime.now()
         
-        # Obtener todas las reservas de la sala ordenadas
-        reservas_existentes = AccesoSala.objects.filter(sala=sala).order_by(
-            '-fecha_reserva', 
-            'bloque_horario'
-        )
+        # Obtener bloque actual como entero o 0 si no hay bloque
+        bloque_actual = self.obtener_bloque_actual(now.time())
+        bloque_actual_num = int(bloque_actual) if bloque_actual else 0
+        
+        # Filtrar reservas futuras o del día actual
+        reservas_existentes = AccesoSala.objects.filter(
+            sala=sala,
+            fecha_reserva__gte=now.date()
+        ).order_by('fecha_reserva', 'bloque_horario')
+        
+        # Función para determinar estado
+        def determinar_estado(reserva):
+            if reserva.fecha_reserva > now.date():
+                return 'Programado'
+            
+            # Convertir bloques a enteros para comparación
+            bloque_reserva = int(reserva.bloque_horario)
+            
+            if bloque_reserva < bloque_actual_num:
+                return 'Finalizado'
+            elif bloque_reserva == bloque_actual_num:
+                return 'Ocupado'
+            return 'Programado'  # Bloque futuro del mismo día
         
         # Preparar datos para la tabla
         reservas_ordenadas = []
         for reserva in reservas_existentes:
+            estado = determinar_estado(reserva)
             reservas_ordenadas.append({
                 'fecha': reserva.fecha_reserva.strftime("%Y-%m-%d"),
                 'fecha_display': reserva.fecha_reserva.strftime("%d/%m/%Y"),
                 'bloque': reserva.get_bloque_horario_display(),
-                'estado': 'Ocupado' if reserva.sala.estado == 'Ocupada' else 'Finalizado',
+                'estado': estado,
                 'curso': reserva.curso,
                 'actividad': reserva.descripcion_actividad,
                 'usuario': str(reserva.usuario)
@@ -140,11 +160,29 @@ class ReservationView(CreateView):
         
         context.update({
             'sala': sala,
-            'today_date': date.today().isoformat(),
+            'today_date': now.date().isoformat(),
             'reservas_ordenadas': reservas_ordenadas
         })
         
         return context
+
+    def obtener_bloque_actual(self, hora):
+        from datetime import time
+        bloques = {
+            '1': (time(8, 15), time(9, 0)),
+            '2': (time(9, 0), time(9, 45)),
+            '3': (time(10, 15), time(11, 0)),
+            '4': (time(11, 0), time(11, 45)),
+            '5': (time(12, 0), time(12, 45)),
+            '6': (time(12, 45), time(13, 30)),
+            '7': (time(14, 15), time(15, 0)),
+            '8': (time(15, 0), time(15, 45)),
+        }
+        
+        for bloque_id, (inicio, fin) in bloques.items():
+            if inicio <= hora <= fin:
+                return bloque_id
+        return None
 
     def form_valid(self, form):
         import random

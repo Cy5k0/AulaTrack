@@ -86,7 +86,10 @@
                                                     <td>{{ reserva.fecha_display }}</td>
                                                     <td>{{ reserva.bloque }}</td>
                                                     <td>
-                                                        <span class="badge {% if reserva.estado == 'Ocupado' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                        <span class="badge 
+                                                            {% if reserva.estado == 'Ocupado' %}bg-danger
+                                                            {% elif reserva.estado == 'Programado' %}bg-warning text-dark
+                                                            {% else %}bg-secondary{% endif %}">
                                                             {{ reserva.estado }}
                                                         </span>
                                                     </td>
