@@ -119,6 +119,7 @@
                             <tr>
                                 <th>Sala</th>
                                 <th>Estado</th>
+                                <th>Información</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -133,6 +134,17 @@
                                         {% else %}bg-warning{% endif %}">
                                         {{ sala.get_estado_display }}
                                     </span>
+                                </td>
+                                <td>
+                                    {% if sala.estado == 'Ocupada' and sala.usuario_actual %}
+                                        <small class="text-muted">Ocupada por: {{ sala.usuario_actual }}</small>
+                                        <br>
+                                        <small class="text-muted">Bloque: {{ sala.bloque_actual }}</small>
+                                    {% elif sala.estado == 'Inhabilitada' %}
+                                        <small class="text-muted">Sala no disponible</small>
+                                    {% else %}
+                                        <small class="text-muted">Disponible para reservar</small>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <a href="{% url 'reservar_sala' sala.id %}" 

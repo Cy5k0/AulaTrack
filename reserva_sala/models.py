@@ -97,6 +97,10 @@ class AccesoSala(models.Model):
         choices=BLOQUES_HORARIOS_CHOICES,
         help_text="Seleccione el bloque horario para la reserva",
     )
+    curso = models.CharField(max_length=100, blank=True, null=True, 
+                            help_text="Indique el curso con el que asistirá")
+    descripcion_actividad = models.TextField(blank=True, null=True,
+                                           help_text="Describa brevemente la actividad a realizar")
 
     class Meta:
         unique_together = ("usuario", "sala", "fecha_reserva", "bloque_horario")
@@ -106,13 +110,15 @@ class AccesoSala(models.Model):
         return f"Reserva de {self.usuario.first_name} {self.usuario.last_name} en {self.sala.nombre} - {self.fecha_reserva} ({self.get_bloque_horario_display()})"
 
     def clean(self):
-        # Validar que no haya reservas duplicadas
-        if AccesoSala.objects.filter(
-            sala=self.sala,
-            fecha_reserva=self.fecha_reserva,
-            bloque_horario=self.bloque_horario,
-        ).exists():
-            raise ValidationError("Este bloque ya está reservado")
+        # Modificar para evitar el error cuando sala aún no está asignada
+        if hasattr(self, 'sala') and self.sala is not None:
+            # Validar que no haya reservas duplicadas
+            if AccesoSala.objects.filter(
+                sala=self.sala,
+                fecha_reserva=self.fecha_reserva,
+                bloque_horario=self.bloque_horario,
+            ).exclude(id=self.id).exists():
+                raise ValidationError("Este bloque ya está reservado")
 
 
 # Create your models here.

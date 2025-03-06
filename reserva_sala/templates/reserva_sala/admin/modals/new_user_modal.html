@@ -13,7 +13,10 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="userRut" class="form-label">RUT</label>
-                        <input type="text" class="form-control" id="userRut" name="rut" required>
+                        <input type="text" class="form-control" id="userRut" name="rut" 
+                               pattern="^0*(\d{1,3}(\.?\d{3})*)-([\dkK])$" 
+                               title="Ingrese RUT válido (Ej: 12345678-9)" required>
+                        <div class="invalid-feedback">Por favor ingrese un RUT válido (Ej: 12345678-9)</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -71,5 +74,73 @@ document.addEventListener('DOMContentLoaded', function() {
             this.querySelector('i').classList.toggle('fa-eye-slash');
         });
     }
+
+    const rutInput = document.getElementById('userRut');
+    
+    // Función de validación en tiempo real
+    function validarRUTEnTiempo() {
+        const rut = rutInput.value.replace(/\./g, '');
+        const isValid = validarRUT(rut);
+        
+        if (rutInput.value === '') {
+            rutInput.classList.remove('is-invalid', 'is-valid');
+        } else {
+            rutInput.classList.toggle('is-invalid', !isValid);
+            rutInput.classList.toggle('is-valid', isValid);
+        }
+    }
+
+    // Validar al perder foco y en tiempo real
+    if (rutInput) {
+        rutInput.addEventListener('blur', validarRUTEnTiempo);
+        rutInput.addEventListener('input', function() {
+            this.classList.remove('is-invalid', 'is-valid');
+            // Autoformatear mientras escribe
+            this.value = this.value.replace(/\./g, '')
+                                  .replace(/^(\d{1,3})(\d{3})(\d{3})(\w)$/, '$1.$2.$3-$4')
+                                  .replace(/^(\d{1,2})(\d{3})(\d{3})(\w)$/, '$1.$2.$3-$4')
+                                  .toUpperCase();
+        });
+    }
+});
+
+// Función de validación de RUT chileno
+function validarRUT(rut) {
+    rut = rut.replace(/\./g, '').toUpperCase();
+    const [cuerpo, dv] = rut.split('-');
+    
+    if (!cuerpo || !dv) return false;
+    
+    // Calcular dígito verificador
+    let suma = 0;
+    let multiplo = 2;
+    
+    for (let i = cuerpo.length - 1; i >= 0; i--) {
+        suma += parseInt(cuerpo.charAt(i)) * multiplo;
+        multiplo = multiplo === 7 ? 2 : multiplo + 1;
+    }
+    
+    const dvCalculado = 11 - (suma % 11);
+    const dvEsperado = dvCalculado === 10 ? 'K' : dvCalculado === 11 ? '0' : dvCalculado.toString();
+    
+    return dvEsperado === dv;
+}
+
+document.getElementById('newUserForm').addEventListener('submit', function(e) {
+    const rutInput = document.getElementById('userRut');
+    const rut = rutInput.value.replace(/\./g, '');
+    
+    if (!validarRUT(rut)) {
+        e.preventDefault();
+        rutInput.classList.add('is-invalid');
+    } else {
+        // Formatear RUT antes de enviar: 12345678-9
+        rutInput.value = rut.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.').replace(/\.(\d\-[kK])$/, '$1');
+    }
+});
+
+// Limpiar validación al modificar
+document.getElementById('userRut').addEventListener('input', function() {
+    this.classList.remove('is-invalid');
 });
 </script> 
