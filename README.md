@@ -29,7 +29,7 @@ Plataforma web para la gestión inteligente de reservas de salas en institucione
 ## ⚙️ Instalación
 ```bash
 # Clonar repositorio
-git clone https://github.com/tu-usuario/AulaTrack.git
+git clone https://github.com/cy5k0/AulaTrack.git
 cd AulaTrack
 
 # Crear entorno virtual
