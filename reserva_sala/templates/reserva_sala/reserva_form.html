@@ -91,6 +91,9 @@
                                                             {% elif reserva.estado == 'Programado' %}bg-warning text-dark
                                                             {% else %}bg-secondary{% endif %}">
                                                             {{ reserva.estado }}
+                                                            {% if reserva.estado == 'Ocupado' and reserva.usuario_reserva %}
+                                                                <span class="ms-2">({{ reserva.usuario_reserva.first_name }})</span>
+                                                            {% endif %}
                                                         </span>
                                                     </td>
                                                     <td>{{ reserva.curso|default:"-" }}</td>
@@ -117,7 +120,12 @@
                                                     <h6>{{ reserva.fecha_display }} - {{ reserva.bloque }}</h6>
                                                     <dl class="row mb-0">
                                                         <dt class="col-sm-4">Estado:</dt>
-                                                        <dd class="col-sm-8">{{ reserva.estado }}</dd>
+                                                        <dd class="col-sm-8">
+                                                            {{ reserva.estado }}
+                                                            {% if reserva.estado == 'Ocupado' %}
+                                                                <span class="text-muted ms-2">(Usuario actual: {{ reserva.usuario_reserva.first_name }})</span>
+                                                            {% endif %}
+                                                        </dd>
                                                         
                                                         <dt class="col-sm-4">Usuario:</dt>
                                                         <dd class="col-sm-8">{{ reserva.usuario }}</dd>

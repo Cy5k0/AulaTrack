@@ -120,39 +120,52 @@ class ReservationView(CreateView):
         sala = Sala.objects.get(id=self.kwargs["pk"])
         now = datetime.now()
         
-        # Obtener bloque actual como entero o 0 si no hay bloque
-        bloque_actual = self.obtener_bloque_actual(now.time())
-        bloque_actual_num = int(bloque_actual) if bloque_actual else 0
+        # Obtener fecha y hora actual
+        fecha_actual = now.date()
+        hora_actual = now.time()
+        
+        # Obtener bloque actual como entero o None
+        bloque_actual = self.obtener_bloque_actual(hora_actual)
+        bloque_actual_num = int(bloque_actual) if bloque_actual else None
         
         # Filtrar reservas futuras o del día actual
         reservas_existentes = AccesoSala.objects.filter(
             sala=sala,
-            fecha_reserva__gte=now.date()
+            fecha_reserva__gte=fecha_actual
         ).order_by('fecha_reserva', 'bloque_horario')
         
-        # Función para determinar estado
+        # Función para determinar estado con precisión de hora
         def determinar_estado(reserva):
-            if reserva.fecha_reserva > now.date():
-                return 'Programado'
+            # Comparación de fechas
+            if reserva.fecha_reserva > fecha_actual:
+                return {'estado': 'Programado', 'usuario': reserva.usuario}
             
-            # Convertir bloques a enteros para comparación
+            if reserva.fecha_reserva < fecha_actual:
+                return {'estado': 'Finalizado', 'usuario': None}
+            
+            # Misma fecha, comparar bloques horarios
+            if bloque_actual_num is None:
+                return {'estado': 'Finalizado', 'usuario': None}  # Fuera de horario lectivo
+            
             bloque_reserva = int(reserva.bloque_horario)
             
             if bloque_reserva < bloque_actual_num:
-                return 'Finalizado'
+                return {'estado': 'Finalizado', 'usuario': None}
             elif bloque_reserva == bloque_actual_num:
-                return 'Ocupado'
-            return 'Programado'  # Bloque futuro del mismo día
+                return {'estado': 'Ocupado', 'usuario': reserva.usuario}
+            else:
+                return {'estado': 'Programado', 'usuario': reserva.usuario}
         
         # Preparar datos para la tabla
         reservas_ordenadas = []
         for reserva in reservas_existentes:
-            estado = determinar_estado(reserva)
+            estado_info = determinar_estado(reserva)
             reservas_ordenadas.append({
                 'fecha': reserva.fecha_reserva.strftime("%Y-%m-%d"),
                 'fecha_display': reserva.fecha_reserva.strftime("%d/%m/%Y"),
                 'bloque': reserva.get_bloque_horario_display(),
-                'estado': estado,
+                'estado': estado_info['estado'],
+                'usuario_reserva': estado_info['usuario'],
                 'curso': reserva.curso,
                 'actividad': reserva.descripcion_actividad,
                 'usuario': str(reserva.usuario)
@@ -160,7 +173,7 @@ class ReservationView(CreateView):
         
         context.update({
             'sala': sala,
-            'today_date': now.date().isoformat(),
+            'today_date': fecha_actual.isoformat(),
             'reservas_ordenadas': reservas_ordenadas
         })
         
