@@ -95,10 +95,16 @@ class DashboardView(View):
                         sala.estado = 'Desocupada'
                         sala.usuario_actual = None
                         sala.bloque_actual = None
+
+        # Obtener las últimas 10 reservas del usuario actual
+        reservas_recientes = AccesoSala.objects.filter(
+            usuario=request.user
+        ).order_by('-fecha_reserva', '-bloque_horario')[:10]
         
         # Pasar las salas al contexto
         context = {
-            'salas_disponibles': salas_disponibles
+            'salas_disponibles': salas_disponibles,
+            'reservas_recientes': reservas_recientes
         }
         
         return render(request, self.template_name, context)

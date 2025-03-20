@@ -177,11 +177,53 @@
                 </h5>
             </div>
             <div class="card-body">
+                {% if reservas_recientes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sala</th>
+                                <th>Fecha</th>
+                                <th>Bloque</th>
+                                <th>Curso</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reserva in reservas_recientes %}
+                            <tr>
+                                <td class="fw-medium">{{ reserva.sala.nombre }}</td>
+                                <td>{{ reserva.fecha_reserva|date:"d/m/Y" }}</td>
+                                <td>{{ reserva.get_bloque_horario_display }}</td>
+                                <td>{{ reserva.curso|default:"-" }}</td>
+                                <td>
+                                    {% now "Y-m-d" as hoy %}
+                                    {% if reserva.fecha_reserva|date:"Y-m-d" > hoy %}
+                                        <span class="badge bg-info">Programada</span>
+                                    {% elif reserva.fecha_reserva|date:"Y-m-d" < hoy %}
+                                        <span class="badge bg-secondary">Finalizada</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">Hoy</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
                 <div class="text-center py-4">
                     <i class="fas fa-clipboard-list text-muted" style="font-size: 2rem;"></i>
                     <p class="mt-3 mb-0 text-muted">No hay actividad reciente para mostrar</p>
                 </div>
+                {% endif %}
             </div>
+            <!-- <div class="card-body">
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-list text-muted" style="font-size: 2rem;"></i>
+                    <p class="mt-3 mb-0 text-muted">No hay actividad reciente para mostrar</p>
+                </div>
+            </div> -->
             <div class="card-footer bg-white d-flex justify-content-end py-3">
                 <a href="{% url 'logout' %}" class="btn btn-danger">
                     <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
